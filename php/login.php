@@ -1,57 +1,55 @@
 <?php
+$host = "localhost";
+$dbname = "your_database";
+$username = "your_mysql_user";
+$password = "your_mysql_password";
 
-header('Content-Type: application/json');
+$redis = new Redis();
+$redis->connect('127.0.0.1', 6379);
 
-
-$input = json_decode(file_get_contents('php://input'), true);
-
-if (!$input || !isset($input['username'], $input['email'], $input['password'])) {
-    echo json_encode(['success' => false, 'message' => 'Invalid input']);
-    exit;
+$conn = new mysqli($host, $username, $password, $dbname);
+if ($conn->connect_error) {
+    http_response_code(500);
+    echo json_encode(["error" => "Database connection failed."]);
+    exit();
 }
 
-$username = trim($input['username']);
-$email = trim($input['email']);
-$password = $input['password'];
+$email = $_POST['email'] ?? '';
+$pass = $_POST['password'] ?? '';
 
-if (strlen($username) < 3 || !filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($password) < 6) {
-    echo json_encode(['success' => false, 'message' => 'Validation failed']);
-    exit;
+if (!$email || !$pass) {
+    echo json_encode(["error" => "All fields are required."]);
+    exit();
 }
 
-try {
-    $manager = new MongoDB\Driver\Manager("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/");
 
-    $filter = ['$or' => [
-        ['username' => $username],
-        ['email' => $email]
-    ]];
+$stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$stmt->store_result();
 
-    $query = new MongoDB\Driver\Query($filter);
-    $cursor = $manager->executeQuery('mydb.users', $query);
-    $existingUsers = $cursor->toArray();
+if ($stmt->num_rows === 0) {
+    echo json_encode(["error" => "Invalid email or password."]);
+} else {
+    $stmt->bind_result($userId, $hashed);
+    $stmt->fetch();
+    if (password_verify($pass, $hashed)) {
+        $token = bin2hex(random_bytes(16));
 
-    if (count($existingUsers) > 0) {
-        echo json_encode(['success' => false, 'message' => 'Username or email already exists']);
-        exit;
+        $redisKey = "session:$token";
+        $redis->set($redisKey, $userId);
+        $redis->expire($redisKey, 3600); 
+
+
+        echo json_encode([
+            "status" => "success",
+            "token" => $token,
+        ]);
+    } else {
+        echo json_encode(["error" => "Invalid email or password."]);
     }
-
-
-    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-
-    $bulk = new MongoDB\Driver\BulkWrite;
-    $doc = [
-        'username' => $username,
-        'email' => $email,
-        'password' => $hashedPassword,
-        'created_at' => new MongoDB\BSON\UTCDateTime()
-    ];
-    $bulk->insert($doc);
-
-    $result = $manager->executeBulkWrite('mydb.users', $bulk);
-
-    echo json_encode(['success' => true]);
-
-} catch (MongoDB\Driver\Exception\Exception $e) {
-    echo json_encode(['success' => false, 'message' => $e->getMessage()]);
 }
+
+$stmt->close();
+$conn->close();
+?>

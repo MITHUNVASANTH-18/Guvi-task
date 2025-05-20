@@ -1,45 +1,25 @@
 $(document).ready(function () {
-  $("#signupForm").on("submit", function (e) {
+  $("#loginForm").on("submit", function (e) {
     e.preventDefault();
 
-    if (!this.checkValidity()) {
-      e.stopPropagation();
-      $(this).addClass("was-validated");
-      return;
-    }
-
-    const data = {
-      username: $("#username").val().trim(),
-      email: $("#email").val().trim(),
-      password: $("#password").val().trim(),
-    };
+    const email = $("#email").val();
+    const password = $("#password").val();
 
     $.ajax({
       url: "php/login.php",
-      type: "POST",
-      data: JSON.stringify(data),
-      contentType: "application/json",
+      method: "POST",
+      data: { email, password },
       dataType: "json",
-      success: function (response) {
-        if (response.success) {
-          $("#responseMessage")
-            .removeClass("text-danger")
-            .addClass("text-success")
-            .text("Registration successful! You can now log in.");
-          $("#signupForm")[0].reset();
-          $("#signupForm").removeClass("was-validated");
+      success: function (res) {
+        if (res.status === "success") {
+          localStorage.setItem("token", res.token);
+          window.location.href = "profile.html";
         } else {
-          $("#responseMessage")
-            .removeClass("text-success")
-            .addClass("text-danger")
-            .text("Error: " + response.message);
+          $("#loginResponse").text(res.error || "Login failed.");
         }
       },
       error: function () {
-        $("#responseMessage")
-          .removeClass("text-success")
-          .addClass("text-danger")
-          .text("An error occurred. Please try again.");
+        $("#loginResponse").text("Server error.");
       },
     });
   });
