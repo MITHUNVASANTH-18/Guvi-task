@@ -15,7 +15,7 @@ $(document).ready(function () {
     };
 
     $.ajax({
-      url: "signup.php",
+      url: "login.php",
       type: "POST",
       data: JSON.stringify(data),
       contentType: "application/json",
