@@ -7,7 +7,7 @@ use MongoDB\Client;
 $mongo = new Client("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/");
 $collection = $mongo->your_mongo_db->profiles;
 
-$userId = 123; // Hardcoded for testing
+$userId = 123; 
 $input = json_decode(file_get_contents('php://input'), true);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
