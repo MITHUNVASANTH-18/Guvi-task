@@ -20,7 +20,7 @@ if (strlen($username) < 3 || !filter_var($email, FILTER_VALIDATE_EMAIL) || strle
 }
 
 try {
-    $manager = new MongoDB\Driver\Manager("mongodb://localhost:27017");
+    $manager = new MongoDB\Driver\Manager("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/");
 
     $filter = ['$or' => [
         ['username' => $username],
