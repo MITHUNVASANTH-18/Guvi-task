@@ -1,70 +1,37 @@
 $(document).ready(function () {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    window.location.href = "/login.html";
-    return;
-  }
-
+  // Load data on page load
   $.ajax({
-    url: "/php/get_profile.php",
-    method: "POST",
-    contentType: "application/json",
-    data: JSON.stringify({ token }),
+    url: "/php/profile.php",
+    method: "GET",
     success: function (res) {
-      if (!res.success) {
-        localStorage.removeItem("token");
-        window.location.href = "/login.html";
-        return;
+      if (res.success && res.profile) {
+        $("#age").val(res.profile.age || "");
+        $("#dob").val(res.profile.dob || "");
+        $("#contact").val(res.profile.contact || "");
       }
-      $("#name").val(res.sqlUser.name);
-      $("#email").val(res.sqlUser.email);
-      $("#age").val(res.mongoProfile.age || "");
-      $("#dob").val(res.mongoProfile.dob || "");
-      $("#contact").val(res.mongoProfile.contact || "");
-    },
-    error: function () {
-      localStorage.removeItem("token");
-      window.location.href = "/login.html";
     },
   });
 
+  // On form submit, send update
   $("#profileForm").submit(function (e) {
     e.preventDefault();
-    const updateData = {
-      token: token,
+
+    const data = {
       age: $("#age").val(),
       dob: $("#dob").val(),
       contact: $("#contact").val(),
     };
+
     $.ajax({
-      url: "/php/update_profile.php",
+      url: "/php/profile.php",
       method: "POST",
       contentType: "application/json",
-      data: JSON.stringify(updateData),
+      data: JSON.stringify(data),
       success: function (res) {
-        $("#message")
-          .text(res.message)
-          .removeClass()
-          .addClass(res.success ? "text-success" : "text-danger");
+        $("#message").text(res.message).css("color", "green");
       },
       error: function () {
-        $("#message")
-          .text("Error updating profile")
-          .removeClass()
-          .addClass("text-danger");
-      },
-    });
-  });
-
-  $("#logoutBtn").click(function () {
-    $.ajax({
-      url: "/php/logout.php",
-      method: "POST",
-      contentType: "application/json",
-      data: JSON.stringify({ token }),
-      complete: function () {
-        localStorage.removeItem("token");
-        window.location.href = "/login.html";
+        $("#message").text("Update failed").css("color", "red");
       },
     });
   });

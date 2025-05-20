@@ -1,26 +1,22 @@
 <?php
 header('Content-Type: application/json');
+require 'vendor/autoload.php';
 
-require 'vendor/autoload.php'; 
+use MongoDB\Client;
 
+$mongo = new Client("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/");
+$collection = $mongo->your_mongo_db->profiles;
 
-$client = new MongoDB\Client("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/");
-
-$collection = $client->your_mongo_db->profiles;
-
-
-$userId = 123;
-
+$userId = 123; // Hardcoded for testing
 $input = json_decode(file_get_contents('php://input'), true);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Update test profile data
     $age = $input['age'] ?? null;
     $dob = $input['dob'] ?? null;
     $contact = $input['contact'] ?? null;
 
     $updateResult = $collection->updateOne(
-        ['user_id' => (int)$userId],
+        ['user_id' => $userId],
         ['$set' => [
             'age' => $age,
             'dob' => $dob,
@@ -29,24 +25,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ['upsert' => true]
     );
 
-    if ($updateResult->getModifiedCount() > 0 || $updateResult->getUpsertedCount() > 0) {
-        echo json_encode(['success' => true, 'message' => 'Profile updated successfully']);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'No changes made or update failed']);
-    }
+    echo json_encode([
+        'success' => true,
+        'message' => 'Profile updated successfully.'
+    ]);
     exit;
 }
 
-// GET request: Fetch profile for hardcoded user id
-$mongoProfile = $collection->findOne(['user_id' => (int)$userId]);
-if (!$mongoProfile) {
-    $mongoProfile = [];
-} else {
-    $mongoProfile = $mongoProfile->getArrayCopy();
-}
+// GET request: return profile
+$profile = $collection->findOne(['user_id' => $userId]);
+$profileData = $profile ? $profile->getArrayCopy() : [];
 
 echo json_encode([
     'success' => true,
-    'userId' => $userId,
-    'mongoProfile' => $mongoProfile
+    'profile' => $profileData
 ]);
+exit;
