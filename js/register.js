@@ -9,19 +9,21 @@ $(document).ready(function () {
     $.ajax({
       type: "POST",
       url: "php/register.php",
-      data: {
-        username: username,
+      contentType: "application/json",
+      dataType: "json",
+      data: JSON.stringify({
+        name: username,
         email: email,
         password: password,
-      },
+      }),
       success: function (response) {
-        if (response === "success") {
+        if (response.success) {
           localStorage.setItem("username", username);
           alert("Registration successful!");
           window.location.href = "profile.html";
         } else {
           $("#responseMessage").html(
-            '<div class="alert alert-danger">' + response + "</div>"
+            '<div class="alert alert-danger">' + response.message + "</div>"
           );
         }
       },
