@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  const token = localStorage.getItem("auth_token");
+  const token = localStorage.getItem("token");
 
   if (!token) {
     alert("User not logged in.");
