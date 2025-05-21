@@ -14,10 +14,10 @@ $dotenv = Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 
 
-$mysql_host = $_ENV['MYSQL_HOST'];
-$mysql_db = $_ENV['MYSQL_DB'];
-$mysql_user = $_ENV['MYSQL_USER'];
-$mysql_pass = $_ENV['MYSQL_PASS'];
+$mysql_host = $_ENV['DB_HOST'];
+$mysql_db = $_ENV['DB_NAME'];
+$mysql_user = $_ENV['DB_USER'];
+$mysql_pass = $_ENV['DB_PASS'];
 $mongo_uri = $_ENV['MONGO_URI'];
 $mongo_db = $_ENV['MONGO_DB'];
 $mongo_collection = $_ENV['MONGO_COLLECTION'];
