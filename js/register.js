@@ -1,5 +1,5 @@
 $(document).ready(function () {
-  $("#signupForm").on("submit", function (e) {
+  $("#registerForm").on("submit", function (e) {
     e.preventDefault();
 
     const username = $("#username").val();
