@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ['upsert' => true]
     );
 
-    $manager->executeBulkWrite('users', $bulk);
+    $manager->executeBulkWrite('mydb.users', $bulk);
 
     echo json_encode([
         'success' => true,
@@ -37,7 +37,7 @@ $filter = ['userId' => $userId];
 $options = [];
 
 $query = new MongoDB\Driver\Query($filter, $options);
-$cursor = $manager->executeQuery('users', $query);
+$cursor = $manager->executeQuery('mydb.users', $query);
 
 $profile = current($cursor->toArray());
 $profileData = $profile ? (array)$profile : [];
