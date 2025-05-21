@@ -1,13 +1,10 @@
 <?php
 header('Content-Type: application/json');
-require 'vendor/autoload.php';
 
-use MongoDB\Client;
 
-$mongo = new Client("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/");
-$collection = $mongo->your_mongo_db->profiles;
+$manager = new MongoDB\Driver\Manager("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/");
 
-$userId = 123; 
+$userId = 123;
 $input = json_decode(file_get_contents('php://input'), true);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -15,8 +12,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $dob = $input['dob'] ?? null;
     $contact = $input['contact'] ?? null;
 
-    $updateResult = $collection->updateOne(
-        ['user_id' => $userId],
+    $bulk = new MongoDB\Driver\BulkWrite;
+    $bulk->update(
+        ['userId' => $userId],
         ['$set' => [
             'age' => $age,
             'dob' => $dob,
@@ -25,6 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ['upsert' => true]
     );
 
+    $manager->executeBulkWrite('users', $bulk);
+
     echo json_encode([
         'success' => true,
         'message' => 'Profile updated successfully.'
@@ -32,11 +32,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-$profile = $collection->findOne(['userId' => $userId]);
-$profileData = $profile ? $profile->getArrayCopy() : [];
+
+$filter = ['userId' => $userId];
+$options = [];
+
+$query = new MongoDB\Driver\Query($filter, $options);
+$cursor = $manager->executeQuery('guvi.profiles', $query);
+
+$profile = current($cursor->toArray());
+$profileData = $profile ? (array)$profile : [];
 
 echo json_encode([
     'success' => true,
     'profile' => $profileData
 ]);
-exit;
