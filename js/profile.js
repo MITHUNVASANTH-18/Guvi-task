@@ -1,18 +1,31 @@
 $(document).ready(function () {
-  // Load data on page load
+  const token = localStorage.getItem("auth_token");
+
+  if (!token) {
+    alert("User not logged in.");
+    return;
+  }
+
   $.ajax({
     url: "/php/profile.php",
     method: "GET",
+    headers: {
+      Authorization: "Bearer " + token,
+    },
     success: function (res) {
       if (res.success && res.profile) {
         $("#age").val(res.profile.age || "");
         $("#dob").val(res.profile.dob || "");
         $("#contact").val(res.profile.contact || "");
+      } else {
+        $("#message").text("Failed to load profile").css("color", "red");
       }
+    },
+    error: function () {
+      $("#message").text("Error loading profile").css("color", "red");
     },
   });
 
-  // On form submit, send update
   $("#profileForm").submit(function (e) {
     e.preventDefault();
 
@@ -25,6 +38,9 @@ $(document).ready(function () {
     $.ajax({
       url: "/php/profile.php",
       method: "POST",
+      headers: {
+        Authorization: "Bearer " + token,
+      },
       contentType: "application/json",
       data: JSON.stringify(data),
       success: function (res) {

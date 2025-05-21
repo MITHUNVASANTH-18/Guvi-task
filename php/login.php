@@ -1,11 +1,11 @@
 <?php
-$host = "localhost";
-$dbname = "your_database";
-$username = "your_mysql_user";
-$password = "your_mysql_password";
+$host = "guvi.cz8ugi66ap5w.eu-north-1.rds.amazonaws.com";
+$dbname = "guvi";
+$username = "admin";
+$password = "Admin123";
 
 $redis = new Redis();
-$redis->connect('127.0.0.1', 6379);
+$redis->connect('13.61.176.93', 6379);
 
 $conn = new mysqli($host, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -36,7 +36,7 @@ if ($stmt->num_rows === 0) {
     if (password_verify($pass, $hashed)) {
         $token = bin2hex(random_bytes(16));
 
-        $redisKey = "session:$token";
+        $redisKey = "$token";
         $redis->set($redisKey, $userId);
         $redis->expire($redisKey, 3600); 
 

@@ -1,17 +1,16 @@
 <?php
 header('Content-Type: application/json');
-require 'vendor/autoload.php'; /
 
-
-$mysql_host = "localhost";
-$mysql_db = "your_mysql_db";
-$mysql_user = "your_mysql_user";
-$mysql_pass = "your_mysql_pass";
+$mysql_host = "guvi.cz8ugi66ap5w.eu-north-1.rds.amazonaws.com";
+$mysql_db = "guvi";
+$mysql_user = "admin";
+$mysql_pass =  "Admin123";
 
 try {
 
     $pdo = new PDO("mysql:host=$mysql_host;dbname=$mysql_db;charset=utf8mb4", $mysql_user, $mysql_pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
 
     $data = json_decode(file_get_contents("php://input"), true);
     $email = $data['email'] ?? '';
@@ -23,7 +22,6 @@ try {
         exit;
     }
 
-
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
     $stmt->execute([$email]);
     if ($stmt->rowCount() > 0) {
@@ -31,31 +29,29 @@ try {
         exit;
     }
 
-
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-
     $stmt = $pdo->prepare("INSERT INTO users (email, password, name) VALUES (?, ?, ?)");
     $stmt->execute([$email, $passwordHash, $name]);
-
     $user_id = $pdo->lastInsertId();
 
-    $mongoClient = new MongoDB\Client("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/");
-    $profilesCollection = $mongoClient->yourMongoDbName->profiles;
+    $manager = new MongoDB\Driver\Manager("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/"); 
+    $bulk = new MongoDB\Driver\BulkWrite;
 
     $profileDoc = [
-        'user_id' => (int)$user_id,
+        'userId' => (int)$user_id,
         'age' => null,
         'dob' => null,
         'contact' => null,
-        'additional_info' => new stdClass()
     ];
+    $bulk->insert($profileDoc);
 
-    $insertResult = $profilesCollection->insertOne($profileDoc);
 
-    if ($insertResult->getInsertedCount() === 1) {
+    $writeResult = $manager->executeBulkWrite('mydb.users', $bulk);
+
+    if ($writeResult->getInsertedCount() === 1) {
         echo json_encode(['success' => true, 'message' => 'Registration successful.']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to create profile document.']);
+        echo json_encode(['success' => false, 'message' => 'MongoDB profile creation failed.']);
     }
 
 } catch (Exception $e) {
