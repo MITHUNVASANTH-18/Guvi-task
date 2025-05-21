@@ -5,7 +5,10 @@ $(document).ready(function () {
     alert("User not logged in.");
     return;
   }
-
+  $("#logoutBtn").on("click", function () {
+    localStorage.removeItem("token");
+    window.location.href = "login.html";
+  });
   $.ajax({
     url: "/php/profile.php",
     method: "GET",
