@@ -32,8 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-// GET request: return profile
-$profile = $collection->findOne(['user_id' => $userId]);
+$profile = $collection->findOne(['userId' => $userId]);
 $profileData = $profile ? $profile->getArrayCopy() : [];
 
 echo json_encode([
