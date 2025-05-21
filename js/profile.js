@@ -14,6 +14,8 @@ $(document).ready(function () {
     },
     success: function (res) {
       if (res.success && res.profile) {
+        $("#name").val(res.profile.name || "");
+        $("#email").val(res.profile.email || "");
         $("#age").val(res.profile.age || "");
         $("#dob").val(res.profile.dob || "");
         $("#contact").val(res.profile.contact || "");
