@@ -20,7 +20,7 @@ $(document).ready(function () {
         if (response.success) {
           localStorage.setItem("username", username);
           alert("Registration successful!");
-          window.location.href = "profile.html";
+          window.location.href = "login.html";
         } else {
           $("#responseMessage").html(
             '<div class="alert alert-danger">' + response.message + "</div>"
