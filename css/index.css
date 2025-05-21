@@ -1,0 +1,37 @@
+
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #e0f7fa, #e1bee7);
+  }
+  .main-container{
+    gap:30px
+  }
+  .main-container img{
+   width: 200px;
+   height: 80px;
+  }
+  .button-container{
+    gap: 20px;
+  }
+  .full-height {
+    height: 100vh;
+  }
+  
+  h1 {
+    font-weight: 700;
+  }
+  
+  .btn {
+    min-width: 120px;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+  
+  .btn:hover {
+    transform: scale(1.05);
+  }
+  

@@ -23,13 +23,13 @@ $(document).ready(function () {
           window.location.href = "login.html";
         } else {
           $("#responseMessage").html(
-            '<div class="alert alert-danger">' + response.message + "</div>"
+            '<div class="responseMessage">' + response.message + "</div>"
           );
         }
       },
       error: function () {
         $("#responseMessage").html(
-          '<div class="alert alert-danger">Server error.</div>'
+          '<div class="responseMessage">Server error.</div>'
         );
       },
     });

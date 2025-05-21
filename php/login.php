@@ -1,11 +1,24 @@
 <?php
-$host = "guvi.cz8ugi66ap5w.eu-north-1.rds.amazonaws.com";
-$dbname = "guvi";
-$username = "admin";
-$password = "Admin123";
+require 'vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+
+$host = $_ENV['DB_HOST'];
+$dbname = $_ENV['DB_NAME'];
+$username = $_ENV['DB_USER'];
+$password = $_ENV['DB_PASS'];
+
+$redisHost = $_ENV['REDIS_HOST'];
+$redisPort = $_ENV['REDIS_PORT'];
 
 $redis = new Redis();
-$redis->connect('13.61.176.93', 6379);
+$redis->connect($redisHost, $redisPort);
+
 
 $conn = new mysqli($host, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -14,6 +27,7 @@ if ($conn->connect_error) {
     exit();
 }
 
+
 $email = $_POST['email'] ?? '';
 $pass = $_POST['password'] ?? '';
 
@@ -21,7 +35,6 @@ if (!$email || !$pass) {
     echo json_encode(["error" => "All fields are required."]);
     exit();
 }
-
 
 $stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
 $stmt->bind_param("s", $email);
@@ -36,10 +49,8 @@ if ($stmt->num_rows === 0) {
     if (password_verify($pass, $hashed)) {
         $token = bin2hex(random_bytes(16));
 
-        $redisKey = "$token";
-        $redis->set($redisKey, $userId);
-        $redis->expire($redisKey, 3600); 
-
+        $redis->set($token, $userId);
+        $redis->expire($token, 3600); 
 
         echo json_encode([
             "status" => "success",

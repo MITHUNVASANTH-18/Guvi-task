@@ -1,14 +1,21 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
 header('Content-Type: application/json');
 
 $redis = new Redis();
 try {
-    $redis->connect('13.61.176.93', 6379);
+    $redis->connect($_ENV['REDIS_HOST'], $_ENV['REDIS_PORT']);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Redis connection failed']);
     exit;
 }
-
 
 $headers = apache_request_headers();
 $authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
@@ -26,15 +33,16 @@ if (!$userId) {
     exit;
 }
 
-$userId = (int)$userId; 
+$userId = (int)$userId;
 
 
 try {
-    $manager = new MongoDB\Driver\Manager("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/");
+    $manager = new MongoDB\Driver\Manager($_ENV['MONGO_URI']);
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'MongoDB connection failed']);
     exit;
 }
+
 
 $input = json_decode(file_get_contents('php://input'), true);
 
@@ -55,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     );
 
     try {
-        $manager->executeBulkWrite('mydb.users', $bulk);
+        $manager->executeBulkWrite($_ENV['MONGO_DB'] . '.' . $_ENV['MONGO_COLLECTION'], $bulk);
         echo json_encode([
             'success' => true,
             'message' => 'Profile updated successfully.'
@@ -73,7 +81,7 @@ $options = [];
 $query = new MongoDB\Driver\Query($filter, $options);
 
 try {
-    $cursor = $manager->executeQuery('mydb.users', $query);
+    $cursor = $manager->executeQuery($_ENV['MONGO_DB'] . '.' . $_ENV['MONGO_COLLECTION'], $query);
     $profile = current($cursor->toArray());
     $profileData = $profile ? (array)$profile : [];
 

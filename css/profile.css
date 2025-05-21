@@ -1,0 +1,30 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #e0f7fa, #e1bee7);
+  }
+  
+  .logo-small {
+    width: 180px;
+    height: 60px;
+    object-fit: contain;
+  }
+  
+  .profile-container {
+    max-width: 500px;
+    margin: auto;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+  }
+
+ .update-button{
+    background-color: #12aa4a;
+  }
+
+  .update-button:hover{
+    background-color: #0caf48 !important;
+  }

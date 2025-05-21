@@ -1,15 +1,27 @@
 <?php
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Dotenv\Dotenv;
+
 header('Content-Type: application/json');
 
-$mysql_host = "guvi.cz8ugi66ap5w.eu-north-1.rds.amazonaws.com";
-$mysql_db = "guvi";
-$mysql_user = "admin";
-$mysql_pass = "Admin123";
+
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+
+$mysql_host = $_ENV['MYSQL_HOST'];
+$mysql_db = $_ENV['MYSQL_DB'];
+$mysql_user = $_ENV['MYSQL_USER'];
+$mysql_pass = $_ENV['MYSQL_PASS'];
+$mongo_uri = $_ENV['MONGO_URI'];
+$mongo_db = $_ENV['MONGO_DB'];
+$mongo_collection = $_ENV['MONGO_COLLECTION'];
 
 try {
+
     $pdo = new PDO("mysql:host=$mysql_host;dbname=$mysql_db;charset=utf8mb4", $mysql_user, $mysql_pass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
 
     $data = json_decode(file_get_contents("php://input"), true);
 
@@ -21,7 +33,6 @@ try {
         echo json_encode(['success' => false, 'message' => 'Please fill all required fields.']);
         exit;
     }
-
 
     $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
     $stmt->execute([$email]);
@@ -38,7 +49,7 @@ try {
     $userId = (int)$pdo->lastInsertId();
 
 
-    $manager = new MongoDB\Driver\Manager("mongodb+srv://mithunvasanthr:1234@guvi.ppdzoy0.mongodb.net/");
+    $manager = new MongoDB\Driver\Manager($mongo_uri);
 
     $bulk = new MongoDB\Driver\BulkWrite;
     $profileDoc = [
@@ -51,7 +62,7 @@ try {
     ];
     $bulk->insert($profileDoc);
 
-    $writeResult = $manager->executeBulkWrite('mydb.users', $bulk);
+    $writeResult = $manager->executeBulkWrite("$mongo_db.$mongo_collection", $bulk);
 
     if ($writeResult->getInsertedCount() === 1) {
         echo json_encode(['success' => true, 'message' => 'Registration successful.']);
@@ -62,4 +73,3 @@ try {
 } catch (Exception $e) {
     echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
 }
-?>
