@@ -37,7 +37,7 @@ $filter = ['userId' => $userId];
 $options = [];
 
 $query = new MongoDB\Driver\Query($filter, $options);
-$cursor = $manager->executeQuery('guvi.profiles', $query);
+$cursor = $manager->executeQuery('users', $query);
 
 $profile = current($cursor->toArray());
 $profileData = $profile ? (array)$profile : [];
